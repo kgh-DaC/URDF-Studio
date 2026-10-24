@@ -1,0 +1,53 @@
+{
+  "unit": "mm",
+  "parts": [
+    {
+      "name": "base",
+      "file": "base.stl",
+      "unit": "mm",
+      "bbox_mm": [
+        120,
+        120,
+        20
+      ],
+      "center_of_mass_mm": [
+        0,
+        0,
+        10
+      ],
+      "frame": "world"
+    },
+    {
+      "name": "arm1",
+      "file": "arm1.stl",
+      "unit": "mm",
+      "bbox_mm": [
+        20,
+        20,
+        150
+      ],
+      "center_of_mass_mm": [
+        0,
+        0,
+        95
+      ],
+      "frame": "world"
+    },
+    {
+      "name": "arm2",
+      "file": "arm2.stl",
+      "unit": "mm",
+      "bbox_mm": [
+        16,
+        16,
+        100
+      ],
+      "center_of_mass_mm": [
+        0,
+        0,
+        220
+      ],
+      "frame": "world"
+    }
+  ]
+}
