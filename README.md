@@ -8,6 +8,7 @@ FreeCAD 모델 ──▶ STL + parts.json ──▶ 메시 물성 계산 ──�
 ```
 
 ## 목차
+0. [웹에서 바로 사용 (GitHub Pages)](#0-웹에서-바로-사용-github-pages)
 1. [구성 요소](#1-구성-요소)
 2. [빠른 시작 (Windows)](#2-빠른-시작-windows)
 3. [Linux / macOS 실행](#3-linux--macos-실행)
@@ -26,12 +27,33 @@ FreeCAD 모델 ──▶ STL + parts.json ──▶ 메시 물성 계산 ──�
 
 ---
 
+## 0. 웹에서 바로 사용 (GitHub Pages)
+
+설치 없이 브라우저에서 바로 쓰는 버전이 `docs/`에 있습니다. 서버가 필요 없고 **파일이 내 PC 밖으로 나가지 않습니다**.
+
+- 주소: <https://kgh-dac.github.io/URDF-Studio/> (저장소 `Settings → Pages`에서 Source를 `Deploy from a branch`, Branch를 `main`, 폴더를 `/docs`로 한 번 지정해야 켜집니다)
+- 로컬에서 보려면: `python -m http.server 8790 --directory docs` 후 <http://127.0.0.1:8790>. `index.html`을 파일로 직접 열면 브라우저가 모듈 로딩을 막으므로 반드시 서버로 여세요.
+
+| 기능 | Pages 버전 | 로컬 서버판(`app/`) |
+| --- | --- | --- |
+| 3D 뷰어, 조인트 슬라이더, 오류 링크 하이라이트 | O | O |
+| URDF 검증 | O (Python 판과 같은 규칙) | O |
+| STL/OBJ/DAE 업로드, 질량·관성·충돌 박스 계산 | O (브라우저 안에서 계산) | O |
+| 메시에서 `<link>` 조각 자동 삽입 | O | - |
+| URDF 다운로드, ROS 2 패키지 zip | O | O |
+| 자연어 생성(Claude API) | **X** | O (`ANTHROPIC_API_KEY` 필요) |
+| 기존 URDF를 명세로 가져와 수정 | X | O |
+
+사용 순서: FreeCAD STL을 **단위 mm**로 업로드 → 각 메시의 **편집기에 링크 추가** → 편집기에서 조인트 작성(자동 검증·렌더) → **ROS 2 패키지 (zip)** → `ros2_ws/src`에 풀기.
+JS 포트(`docs/js/validator.js`, `meshprops.js`, `package.js`)는 Python 판과 같은 입력에서 같은 결과가 나오는지 확인했습니다(검증기 26개 케이스, 메시 물성 7개 케이스, zip 파일 내용). three.js, urdf-loader, JSZip은 `docs/vendor/`에 포함되어 CDN이 필요 없습니다.
+
 ## 1. 구성 요소
 
 | 구성 | 위치 | 역할 |
 | --- | --- | --- |
 | 웹 앱 | `app/` | FastAPI 서버 + 브라우저 UI. 3D 미리보기, 검증, 메시 업로드, URDF/ZIP 다운로드, 자연어 생성 |
-| 실행 페이지 | `docs/index.html` | 로컬 서버가 켜져 있는지 확인하고 실행 방법을 안내하는 정적 페이지 |
+| 웹 버전 | `docs/index.html`, `docs/js/`, `docs/vendor/` | 서버 없이 브라우저에서 동작하는 URDF Studio (GitHub Pages) |
+| 로컬 서버 안내 | `docs/local.html` | 로컬 서버가 켜져 있는지 확인하고 실행 방법을 안내하는 정적 페이지 |
 | FreeCAD 내보내기 | `.claude/skills/freecad-export/` | FreeCAD 매크로. 부품별 STL과 `parts.json` 생성, 데모 모델 생성 |
 | 워크스페이스 설치 | `.claude/skills/ros2-workspace-install/` | 검증 통과 시에만 `<ws>/src/<robot>_description/` 패키지 생성 |
 | 검증 스크립트 | `.claude/skills/urdf-validation/` | 웹 앱 검증기와 같은 규칙의 단독 실행 스크립트 |
@@ -57,7 +79,7 @@ cd app
 ```
 실행 정책 오류가 나면 `powershell -ExecutionPolicy Bypass -File .\run.ps1`.
 
-`docs/index.html`을 브라우저로 열면 서버 실행 여부를 확인하고 버튼으로 앱을 열 수 있습니다. 다만 이 페이지가 서버를 대신 실행하지는 못합니다(서버는 반드시 내 PC에서 직접 켜야 합니다).
+`docs/local.html`을 웹 서버로 열면 서버 실행 여부를 확인하고 버튼으로 앱을 열 수 있습니다. 다만 이 페이지가 서버를 대신 실행하지는 못합니다(서버는 반드시 내 PC에서 직접 켜야 합니다).
 
 ## 3. Linux / macOS 실행
 
@@ -199,7 +221,11 @@ Claude Code로 이 저장소를 열면 `CLAUDE.md`에 따라 URDF 관련 요청�
 ```
 URDF-Studio/
 ├─ README.md  WINDOWS.md  CLAUDE.md
-├─ docs/index.html              실행 안내 페이지
+├─ docs/                        GitHub Pages 웹 버전
+│  ├─ index.html  css/  js/     브라우저 전용 앱 (검증·메시 분석·zip 포트)
+│  ├─ vendor/                   three.js, urdf-loader, JSZip (고정 버전)
+│  ├─ samples/                  샘플 URDF
+│  └─ local.html                로컬 서버 안내 페이지
 ├─ app/
 │  ├─ main.py                   FastAPI 엔드포인트
 │  ├─ schema.py                 명세 JSON·요청/응답 스키마
