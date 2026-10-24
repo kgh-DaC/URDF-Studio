@@ -3,7 +3,7 @@
 ## 1. 준비 (한 번만)
 1. Python 3.11 이상 설치: https://www.python.org/downloads/ ("Add python.exe to PATH", "py launcher" 체크)
 2. 이 저장소를 내려받는다.
-   - Git: `git clone https://github.com/kgh-DaC/urdf.git` 후 `git checkout claude/zealous-volta-acwqkd`
+   - Git: `git clone https://github.com/kgh-DaC/URDF-Studio.git` 후 (병합 전이라면 `git checkout claude/zealous-volta-acwqkd`)
    - 또는 GitHub 페이지에서 해당 브랜치를 **Code → Download ZIP**으로 받아 압축을 푼다.
 
 ## 2. 실행

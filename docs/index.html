@@ -66,15 +66,15 @@
       <ol>
         <li>Python 3.11 이상을 설치합니다 (설치 화면에서 <b>Add python.exe to PATH</b>, <b>py launcher</b> 체크).</li>
         <li>저장소를 받습니다. 저장소 폴더 안에서 아래를 실행하거나 ZIP을 풀어도 됩니다.
-<pre><code>git clone https://github.com/kgh-DaC/urdf.git
-cd urdf</code></pre></li>
+<pre><code>git clone https://github.com/kgh-DaC/URDF-Studio.git
+cd URDF-Studio</code></pre></li>
         <li><code>app\run.bat</code>을 더블클릭합니다. 처음에는 패키지 설치로 몇 분 걸리고, 끝나면 브라우저가 자동으로 열립니다.</li>
       </ol>
       <p class="muted">PowerShell을 쓰면 <code>cd app</code> 후 <code>.\run.ps1</code>. 실행 정책 오류 시 <code>powershell -ExecutionPolicy Bypass -File .\run.ps1</code>.</p>
     </div>
     <div class="panel" id="p-lin" hidden>
-<pre><code>git clone https://github.com/kgh-DaC/urdf.git
-cd urdf/app
+<pre><code>git clone https://github.com/kgh-DaC/URDF-Studio.git
+cd URDF-Studio/app
 python3 -m venv .venv &amp;&amp; . .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --port 8000</code></pre>
