@@ -259,7 +259,7 @@ Windows는 `.\.venv\Scripts\python -m pytest -q`.
 | 패키지 설치 실패 | 인터넷 연결, Python 3.11 이상인지. `app\.venv` 폴더를 지우고 다시 실행 |
 | 3D 화면이 비어 있음 | 인터넷과 사내망의 jsDelivr 차단 여부. 브라우저 개발자도구 콘솔 확인 |
 | 포트 사용 중 | `run.bat 8080` 또는 `.\run.ps1 -Port 8080`. 실행 페이지의 포트 칸도 같은 값으로 |
-| 400/403 Host 오류 | `URDF_APP_ALLOWED_HOSTS`에 접속 호스트명 추가 |
+| 400 `invalid_host` | `URDF_APP_ALLOWED_HOSTS`에 접속 호스트명 추가 |
 | 생성 버튼이 503 | `ANTHROPIC_API_KEY` 미설정. 설정 후 서버 재시작 |
 | 메시가 너무 크거나 작게 보임 | 업로드 시 단위를 `자동` 대신 `mm`/`m`으로 명시 |
 | 설치 스크립트가 중단 | 출력된 검증 error를 먼저 수정. 같은 패키지가 있으면 `--force` |
