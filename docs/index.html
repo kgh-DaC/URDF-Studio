@@ -1,136 +1,108 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URDF Studio 실행 페이지</title>
-<style>
-  :root { --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6570; --card:#fff; --line:#dde1e6; --accent:#2f6df6; --ok:#1a7f4b; --bad:#b42318; --code:#eef0f3; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f1318; --fg:#e6e9ed; --muted:#9aa5b1; --card:#171c23; --line:#2a323c; --accent:#5b8dff; --ok:#3ccf87; --bad:#ff7b72; --code:#0b0e12; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>URDF Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./css/style.css">
+  <!-- three@0.186.1, urdf-loader@0.13.1, jszip@3.10.1 은 vendor/ 에 포함(CDN 불필요). 원본 SRI 해시와 일치 확인함. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/build/three.module.js",
+      "three/examples/jsm/": "./vendor/three/examples/jsm/",
+      "urdf-loader": "./vendor/urdf-loader/src/URDFLoader.js"
+    }
   }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 system-ui,"Segoe UI","Malgun Gothic",sans-serif; }
-  main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
-  h1 { font-size:1.9rem; margin:0 0 4px; }
-  h2 { font-size:1.2rem; margin:0 0 10px; }
-  p.lead { color:var(--muted); margin:0 0 24px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
-  .status { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .dot { width:12px; height:12px; border-radius:50%; background:var(--muted); }
-  .dot.ok { background:var(--ok); } .dot.bad { background:var(--bad); }
-  .btn { display:inline-block; padding:10px 18px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; text-decoration:none; font-weight:600; cursor:pointer; font-size:1rem; }
-  .btn.ghost { background:transparent; color:var(--accent); }
-  .btn[aria-disabled="true"] { opacity:.45; pointer-events:none; }
-  pre { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:12px 14px; overflow-x:auto; margin:8px 0; font-size:.9rem; position:relative; }
-  code { font-family:ui-monospace,Consolas,monospace; }
-  .tabs { display:flex; gap:8px; margin-bottom:10px; }
-  .tabs button { border:1px solid var(--line); background:transparent; color:var(--fg); padding:6px 14px; border-radius:999px; cursor:pointer; font-size:.95rem; }
-  .tabs button[aria-selected="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .panel[hidden] { display:none; }
-  ol { padding-left:22px; } li { margin:6px 0; }
-  .muted { color:var(--muted); font-size:.92rem; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
-  .grid div { border:1px solid var(--line); border-radius:8px; padding:12px; }
-  .grid b { display:block; margin-bottom:4px; }
-  input[type=number] { width:90px; padding:6px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
-  button.copy { position:absolute; top:6px; right:6px; font-size:.75rem; padding:2px 8px; border-radius:6px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
-</style>
+  </script>
 </head>
 <body>
-<main>
-  <h1>URDF Studio</h1>
-  <p class="lead">FreeCAD 모델과 STL 메시로 ROS 2 URDF를 만들고, 3D로 확인하고, 검증한 뒤 워크스페이스에 넣는 웹 앱입니다.</p>
+<header class="topbar">
+  <div class="brand">URDF Studio</div>
+  <div class="badge ok">서버 없이 브라우저에서 실행 · 파일은 내 PC 밖으로 나가지 않음</div>
+  <div class="spacer"></div>
+  <button id="btnDownloadUrdf" class="btn" title="편집기의 URDF를 다운로드">URDF 다운로드</button>
+  <button id="btnDownloadZip" class="btn primary" title="ROS 2 description 패키지 zip">ROS 2 패키지 (zip)</button>
+</header>
 
-  <section class="card" aria-labelledby="h-run">
-    <h2 id="h-run">1. 내 컴퓨터에서 실행 중인 URDF Studio 열기</h2>
-    <div class="status">
-      <span class="dot" id="dot"></span>
-      <span id="stateText">서버 확인 중…</span>
-    </div>
-    <p style="margin:12px 0 0">
-      포트 <input type="number" id="port" value="8000" min="1" max="65535" aria-label="포트">
-      <a class="btn" id="open" href="http://127.0.0.1:8000" target="_blank" rel="noopener" aria-disabled="true">URDF Studio 열기</a>
-      <button class="btn ghost" id="recheck" type="button">다시 확인</button>
-    </p>
-    <p class="muted">이 페이지는 웹 앱 서버를 대신 실행하지 못합니다. URDF 검증과 메시 계산은 내 컴퓨터의 Python 서버가 하기 때문에, 아래 2번으로 먼저 서버를 켜야 버튼이 활성화됩니다. 페이지는 <code>127.0.0.1</code>의 서버가 응답하는지만 확인하며 데이터를 보내지 않습니다.</p>
-  </section>
-
-  <section class="card" aria-labelledby="h-start">
-    <h2 id="h-start">2. 서버 켜기</h2>
-    <div class="tabs" role="tablist">
-      <button role="tab" aria-selected="true" data-p="win">Windows</button>
-      <button role="tab" aria-selected="false" data-p="lin">Linux / macOS</button>
-    </div>
-    <div class="panel" id="p-win">
-      <ol>
-        <li>Python 3.11 이상을 설치합니다 (설치 화면에서 <b>Add python.exe to PATH</b>, <b>py launcher</b> 체크).</li>
-        <li>저장소를 받습니다. 저장소 폴더 안에서 아래를 실행하거나 ZIP을 풀어도 됩니다.
-<pre><code>git clone https://github.com/kgh-DaC/URDF-Studio.git
-cd URDF-Studio</code></pre></li>
-        <li><code>app\run.bat</code>을 더블클릭합니다. 처음에는 패키지 설치로 몇 분 걸리고, 끝나면 브라우저가 자동으로 열립니다.</li>
+<main class="layout">
+  <!-- Left: inputs -->
+  <aside class="panel left">
+    <section>
+      <h2>사용 방법</h2>
+      <ol class="small steps">
+        <li>FreeCAD에서 내보낸 STL을 아래에서 <b>단위 mm</b>로 업로드</li>
+        <li>메시의 <b>편집기에 링크 추가</b>로 링크 조각 삽입(질량·관성·충돌 박스 자동)</li>
+        <li>조인트를 편집기에서 작성하면 자동 검증·3D 확인</li>
+        <li><b>ROS 2 패키지 (zip)</b> 을 받아 <code>ros2_ws/src</code>에 풀기</li>
       </ol>
-      <p class="muted">PowerShell을 쓰면 <code>cd app</code> 후 <code>.\run.ps1</code>. 실행 정책 오류 시 <code>powershell -ExecutionPolicy Bypass -File .\run.ps1</code>.</p>
+      <div class="muted small">자연어 생성(Claude API)은 이 페이지에서 제공하지 않습니다. 로컬 서버판에서 사용하세요 → <a href="https://github.com/kgh-DaC/URDF-Studio#readme" target="_blank" rel="noopener">README</a></div>
+    </section>
+
+    <section>
+      <h2>메시 업로드 <span class="muted small">stl · dae · obj, 최대 20 MB</span></h2>
+      <input type="file" id="meshFiles" accept=".stl,.dae,.obj" multiple>
+      <div class="row">
+        <label>단위 <select id="meshUnit"><option value="">자동</option><option value="mm">mm</option><option value="m">m</option></select></label>
+        <label>질량(kg) <input type="number" id="meshMass" min="0" step="0.01" placeholder="자동"></label>
+        <label>밀도(kg/m³) <input type="number" id="meshDensity" min="0" step="1" placeholder="1000"></label>
+      </div>
+      <button id="btnUpload" class="btn block">업로드 및 분석</button>
+      <div class="muted small">질량을 비우면 밀도(기본 1000)×부피로 계산합니다. 알루미늄 2700, 강철 7850.</div>
+      <ul id="meshList" class="meshlist small"></ul>
+    </section>
+
+    <section>
+      <h2>샘플 / 파일</h2>
+      <div class="row">
+        <select id="sampleSelect"></select>
+        <button id="btnLoadSample" class="btn">불러오기</button>
+      </div>
+      <label class="btn block filebtn">URDF 파일 열기<input type="file" id="urdfFile" accept=".urdf,.xml" hidden></label>
+      <div class="muted small">기존 URDF는 아래 편집기에 붙여넣으면 자동 검증·렌더링됩니다.</div>
+    </section>
+  </aside>
+
+  <!-- Center: viewer -->
+  <section class="viewer-wrap">
+    <div id="viewer"></div>
+    <div id="viewerMsg" class="viewer-msg"></div>
+    <div class="joints" id="jointsPanel">
+      <div class="joints-head">
+        <strong>조인트</strong>
+        <button id="btnResetJoints" class="btn tiny">0으로</button>
+      </div>
+      <div id="jointSliders"></div>
     </div>
-    <div class="panel" id="p-lin" hidden>
-<pre><code>git clone https://github.com/kgh-DaC/URDF-Studio.git
-cd URDF-Studio/app
-python3 -m venv .venv &amp;&amp; . .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --port 8000</code></pre>
-    </div>
-    <p class="muted">자연어 생성 기능을 쓰려면 서버를 켜기 전에 <code>ANTHROPIC_API_KEY</code> 환경변수를 설정합니다. 없어도 검증·3D 뷰어·메시 업로드·ZIP 내보내기는 동작합니다. 3D 뷰어는 CDN에서 three.js를 받으므로 인터넷이 필요합니다.</p>
   </section>
 
-  <section class="card" aria-labelledby="h-flow">
-    <h2 id="h-flow">3. 작업 흐름</h2>
-    <div class="grid">
-      <div><b>① FreeCAD</b>링크 단위로 Body/Part를 만들고 <code>export_parts.py</code> 매크로로 STL과 <code>parts.json</code>을 내보냅니다.</div>
-      <div><b>② 업로드·분석</b>STL을 올리고 단위(mm)와 밀도를 지정하면 질량·관성을 계산합니다.</div>
-      <div><b>③ URDF 작성·검증</b>자연어로 생성하거나 편집기에서 수정합니다. 오류는 3D 뷰어의 링크 하이라이트로 표시됩니다.</div>
-      <div><b>④ ROS 2 반영</b>ZIP을 받아 <code>ros2_ws/src</code>에 풀거나, 설치 스크립트로 검증 후 자동 배치합니다.</div>
-    </div>
-    <p>워크스페이스 자동 설치:</p>
-<pre><code>python -I .claude/skills/ros2-workspace-install/scripts/install_to_workspace.py ^
-  --urdf output/robot.urdf --meshes meshes --ws C:\ros2_ws --dry-run</code></pre>
-    <p class="muted">먼저 <code>--dry-run</code>으로 확인하고, 문제가 없으면 옵션을 빼고 실행합니다. 검증 오류가 있으면 설치되지 않습니다. 자세한 내용은 저장소의 <code>README.md</code>를 참고하세요.</p>
-  </section>
+  <!-- Right: validation -->
+  <aside class="panel right">
+    <section>
+      <h2>검증 결과</h2>
+      <div id="valSummary" class="summary">-</div>
+      <ul id="issues" class="issues"></ul>
+    </section>
+    </aside>
 
-  <section class="card" aria-labelledby="h-help">
-    <h2 id="h-help">문제 해결</h2>
-    <ul>
-      <li><b>버튼이 계속 비활성화</b>: 서버 창(검은 창)이 열려 있는지, 포트 번호가 서버와 같은지 확인합니다.</li>
-      <li><b>3D 화면이 비어 있음</b>: 인터넷 연결과 사내망의 CDN(jsdelivr) 차단 여부를 확인합니다.</li>
-      <li><b>다른 호스트명으로 접속</b>: <code>URDF_APP_ALLOWED_HOSTS</code> 환경변수에 호스트를 추가합니다.</li>
-    </ul>
+  <!-- Bottom: editor -->
+  <section class="editor-wrap">
+    <div class="editor-head">
+      <strong>URDF 편집기</strong>
+      <span id="editorState" class="muted small"></span>
+      <div class="spacer"></div>
+      <label class="check small"><input type="checkbox" id="autoApply" checked> 입력 시 자동 검증·렌더</label>
+      <button id="btnApply" class="btn">검증 + 렌더</button>
+    </div>
+    <div class="editor">
+      <pre id="gutter" class="gutter" aria-hidden="true">1</pre>
+      <textarea id="editor" spellcheck="false" wrap="off" placeholder="여기에 URDF XML을 붙여넣으세요"></textarea>
+    </div>
   </section>
 </main>
-<script>
-(function () {
-  var dot = document.getElementById('dot'), text = document.getElementById('stateText');
-  var open = document.getElementById('open'), port = document.getElementById('port');
-  function check() {
-    var p = parseInt(port.value, 10) || 8000, base = 'http://127.0.0.1:' + p;
-    open.href = base;
-    dot.className = 'dot'; text.textContent = '서버 확인 중…'; open.setAttribute('aria-disabled', 'true');
-    var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 2500);
-    // no-cors: 응답 내용은 못 읽지만 서버가 떠 있는지(연결 가능 여부)는 알 수 있다.
-    fetch(base + '/api/health', { mode: 'no-cors', signal: ctl.signal, cache: 'no-store' })
-      .then(function () { dot.className = 'dot ok'; text.textContent = '서버 실행 중 (' + base + ')'; open.removeAttribute('aria-disabled'); })
-      .catch(function () { dot.className = 'dot bad'; text.textContent = '서버가 꺼져 있습니다. 아래 2번으로 먼저 켜세요.'; })
-      .finally(function () { clearTimeout(t); });
-  }
-  document.getElementById('recheck').onclick = check;
-  port.onchange = check;
-  document.querySelectorAll('.tabs button').forEach(function (b) {
-    b.onclick = function () {
-      document.querySelectorAll('.tabs button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
-      document.getElementById('p-win').hidden = b.dataset.p !== 'win';
-      document.getElementById('p-lin').hidden = b.dataset.p !== 'lin';
-    };
-  });
-  check();
-})();
-</script>
+
+<script src="./vendor/jszip/jszip.min.js"></script>
+<script type="module" src="./js/app.js"></script>
 </body>
 </html>
