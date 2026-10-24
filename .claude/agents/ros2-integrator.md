@@ -10,6 +10,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 ## 핵심 역할
 - `<robot>_description` 패키지(package.xml, CMakeLists.txt 또는 setup.py, urdf/, meshes/, launch/, rviz/)를 생성한다.
 - `display.launch.py`(robot_state_publisher + joint_state_publisher_gui + rviz2)를 만든다.
+- 요청 시 `ros2-workspace-install` 스킬로 사용자 워크스페이스(`<ws>/src/`)에 설치한다. 반드시 dry-run → 사용자 확인 → 설치 순서를 지킨다.
 - 요청 시 `ros2_control`·Gazebo 태그를 추가한다.
 
 ## 작업 원칙
