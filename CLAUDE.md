@@ -4,9 +4,10 @@
 
 **목표:** 자연어·CAD/메시·기존 URDF 입력으로 ROS 2 URDF를 쉽게 생성·수정·검증하는 웹 앱을 Claude로 개발하고 운영한다.
 
-**호출 조건:** URDF 생성/수정/검증, 메시 연결, 웹 앱 개발, ROS 2 패키징 관련 작업을 요청받으면 `urdf-builder` 스킬을 사용한다. 후속 수정·재실행 요청에도 사용한다. 단순 질문에는 직접 답해도 된다.
+**호출 조건:** URDF 생성/수정/검증, 메시 연결, 웹 앱 개발, ROS 2 패키징 관련 작업을 요청받으면 `urdf-builder` 스킬을 사용한다. FreeCAD 내보내기, ROS 2 워크스페이스 설치 요청도 포함한다. 후속 수정·재실행 요청에도 사용한다. 단순 질문에는 직접 답해도 된다.
 
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
 | --- | --- | --- | --- |
 | 2026-10-20 | Harness v2로 처음 구성 | 전체 | - |
+| 2026-10-24 | `freecad-export`, `ros2-workspace-install` 스킬 추가, 오케스트레이터에 단계 0·8 추가, Windows 실행기(`app/run.bat`, `WINDOWS.md`) 추가 | skills, urdf-builder, ros2-integrator | FreeCAD→URDF/xacro→검증→워크스페이스 설치 흐름 지원 |
