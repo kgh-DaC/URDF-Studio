@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- Intentionally broken sample: missing limit, zero mass, non-physical inertia,
+     dangling parent reference, lower >= upper, non-unit axis, orphan link. -->
+<robot name="broken_arm">
+  <link name="base_link">
+    <visual><geometry><box size="0.2 0.2 0.1"/></geometry></visual>
+    <inertial><mass value="1.0"/><inertia ixx="0.004" ixy="0" ixz="0" iyy="0.004" iyz="0" izz="0.0067"/></inertial>
+  </link>
+  <link name="arm_link">
+    <visual><origin xyz="0 0 0.15"/><geometry><box size="0.05 0.05 0.3"/></geometry></visual>
+    <inertial><mass value="0"/><inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.5"/></inertial>
+  </link>
+  <link name="wrist_link">
+    <visual><geometry><sphere radius="0.03"/></geometry></visual>
+    <inertial><mass value="0.1"/><inertia ixx="0.00004" ixy="0" ixz="0" iyy="0.00004" iyz="0" izz="0.00004"/></inertial>
+  </link>
+  <link name="orphan_link">
+    <visual><geometry><box size="0.05 0.05 0.05"/></geometry></visual>
+    <inertial><mass value="0.1"/><inertia ixx="0.00004" ixy="0" ixz="0" iyy="0.00004" iyz="0" izz="0.00004"/></inertial>
+  </link>
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="base_link"/><child link="arm_link"/>
+    <origin xyz="0 0 0.05"/><axis xyz="0 1 1"/>
+  </joint>
+  <joint name="wrist_joint" type="revolute">
+    <parent link="forearm_link"/><child link="wrist_link"/>
+    <origin xyz="0 0 0.3"/><axis xyz="0 0 1"/>
+    <limit lower="1.0" upper="-1.0" effort="5" velocity="1"/>
+  </joint>
+</robot>

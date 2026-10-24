@@ -1,0 +1,29 @@
+{
+  "robot_name": "two_link_arm",
+  "links": [
+    {"name": "base_link", "geometry": {"type": "cylinder", "radius": 0.08, "length": 0.05},
+     "visual_origin": {"xyz": [0, 0, 0.025], "rpy": [0, 0, 0]}, "mass": 2.0, "color": [0.3, 0.3, 0.33, 1]},
+    {"name": "shoulder_link", "geometry": {"type": "cylinder", "radius": 0.04, "length": 0.1},
+     "visual_origin": {"xyz": [0, 0, 0.05], "rpy": [0, 0, 0]}, "mass": 0.6},
+    {"name": "upper_arm_link", "geometry": {"type": "box", "size": [0.05, 0.05, 0.3]},
+     "visual_origin": {"xyz": [0, 0, 0.15], "rpy": [0, 0, 0]}, "mass": 0.8},
+    {"name": "forearm_link", "geometry": {"type": "box", "size": [0.04, 0.04, 0.25]},
+     "visual_origin": {"xyz": [0, 0, 0.125], "rpy": [0, 0, 0]}, "mass": 0.5},
+    {"name": "tool_link", "geometry": {"type": "sphere", "radius": 0.03},
+     "visual_origin": {"xyz": [0, 0, 0], "rpy": [0, 0, 0]}, "mass": 0.1, "color": [0.85, 0.25, 0.25, 1]}
+  ],
+  "joints": [
+    {"name": "shoulder_pan_joint", "type": "revolute", "parent": "base_link", "child": "shoulder_link",
+     "origin": {"xyz": [0, 0, 0.05], "rpy": [0, 0, 0]}, "axis": [0, 0, 1],
+     "limit": {"lower": -3.14159, "upper": 3.14159, "effort": 20, "velocity": 2.0}},
+    {"name": "shoulder_lift_joint", "type": "revolute", "parent": "shoulder_link", "child": "upper_arm_link",
+     "origin": {"xyz": [0, 0, 0.1], "rpy": [0, 0, 0]}, "axis": [0, 1, 0],
+     "limit": {"lower": -1.57, "upper": 1.57, "effort": 20, "velocity": 2.0}},
+    {"name": "elbow_joint", "type": "revolute", "parent": "upper_arm_link", "child": "forearm_link",
+     "origin": {"xyz": [0, 0, 0.3], "rpy": [0, 0, 0]}, "axis": [0, 1, 0],
+     "limit": {"lower": -2.5, "upper": 2.5, "effort": 10, "velocity": 2.5}},
+    {"name": "forearm_to_tool_joint", "type": "fixed", "parent": "forearm_link", "child": "tool_link",
+     "origin": {"xyz": [0, 0, 0.25], "rpy": [0, 0, 0]}}
+  ],
+  "assumptions": ["Sample: 2-DOF arm (plus pan) with box links; masses are illustrative."]
+}

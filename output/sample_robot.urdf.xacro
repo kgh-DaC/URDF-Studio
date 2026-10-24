@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<!-- sample_robot: 4-wheel box base + 2-DOF planar arm (shoulder/elbow pitch). SI units (m, kg, rad). -->
+<robot name="sample_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===== Parameters ===== -->
+  <xacro:property name="PI" value="3.14159265358979"/>
+
+  <xacro:property name="base_x" value="0.6"/>
+  <xacro:property name="base_y" value="0.4"/>
+  <xacro:property name="base_z" value="0.15"/>
+  <xacro:property name="base_m" value="10.0"/>
+
+  <xacro:property name="wheel_r" value="0.1"/>
+  <xacro:property name="wheel_w" value="0.05"/>
+  <xacro:property name="wheel_m" value="1.0"/>
+  <xacro:property name="wheel_x" value="0.2"/>
+  <xacro:property name="wheel_gap" value="0.005"/>
+  <xacro:property name="wheel_y" value="${base_y/2 + wheel_gap + wheel_w/2}"/>
+  <xacro:property name="wheel_z" value="-0.05"/>
+
+  <xacro:property name="ped_r" value="0.06"/>
+  <xacro:property name="ped_h" value="0.05"/>
+  <xacro:property name="ped_m" value="0.5"/>
+  <xacro:property name="ped_x" value="0.1"/>
+
+  <xacro:property name="ua_x" value="0.05"/>
+  <xacro:property name="ua_y" value="0.05"/>
+  <xacro:property name="ua_l" value="0.3"/>
+  <xacro:property name="ua_m" value="1.0"/>
+
+  <xacro:property name="fa_x" value="0.04"/>
+  <xacro:property name="fa_y" value="0.04"/>
+  <xacro:property name="fa_l" value="0.25"/>
+  <xacro:property name="fa_m" value="0.6"/>
+
+  <xacro:property name="tip_r" value="0.02"/>
+  <xacro:property name="tip_m" value="0.05"/>
+
+  <!-- ===== Materials ===== -->
+  <material name="blue"><color rgba="0.2 0.4 0.8 1"/></material>
+  <material name="black"><color rgba="0.1 0.1 0.1 1"/></material>
+  <material name="orange"><color rgba="1.0 0.5 0.1 1"/></material>
+  <material name="grey"><color rgba="0.6 0.6 0.6 1"/></material>
+
+  <!-- ===== Inertia macros (shape formulas) ===== -->
+  <xacro:macro name="box_inertial" params="m x y z *origin">
+    <inertial>
+      <xacro:insert_block name="origin"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m/12*(y*y+z*z)}" ixy="0" ixz="0"
+               iyy="${m/12*(x*x+z*z)}" iyz="0"
+               izz="${m/12*(x*x+y*y)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- cylinder with its axis along link z -->
+  <xacro:macro name="cylinder_z_inertial" params="m r h">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m/12*(3*r*r+h*h)}" ixy="0" ixz="0"
+               iyy="${m/12*(3*r*r+h*h)}" iyz="0"
+               izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- cylinder with its axis along link y (wheels) -->
+  <xacro:macro name="cylinder_y_inertial" params="m r h">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m/12*(3*r*r+h*h)}" ixy="0" ixz="0"
+               iyy="${m*r*r/2}" iyz="0"
+               izz="${m/12*(3*r*r+h*h)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertial" params="m r">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${2/5*m*r*r}" ixy="0" ixz="0"
+               iyy="${2/5*m*r*r}" iyz="0"
+               izz="${2/5*m*r*r}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ===== Wheel macro ===== -->
+  <xacro:macro name="wheel" params="prefix x y">
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry><cylinder radius="${wheel_r}" length="${wheel_w}"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry><cylinder radius="${wheel_r}" length="${wheel_w}"/></geometry>
+      </collision>
+      <xacro:cylinder_y_inertial m="${wheel_m}" r="${wheel_r}" h="${wheel_w}"/>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="${x} ${y} ${wheel_z}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="5.0" velocity="10.0"/>
+      <dynamics damping="0.1" friction="0.0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===== Base ===== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_x} ${base_y} ${base_z}"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_x} ${base_y} ${base_z}"/></geometry>
+    </collision>
+    <xacro:box_inertial m="${base_m}" x="${base_x}" y="${base_y}" z="${base_z}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:box_inertial>
+  </link>
+
+  <xacro:wheel prefix="front_left"  x="${wheel_x}"  y="${wheel_y}"/>
+  <xacro:wheel prefix="front_right" x="${wheel_x}"  y="${-wheel_y}"/>
+  <xacro:wheel prefix="rear_left"   x="${-wheel_x}" y="${wheel_y}"/>
+  <xacro:wheel prefix="rear_right"  x="${-wheel_x}" y="${-wheel_y}"/>
+
+  <!-- ===== Arm ===== -->
+  <link name="arm_pedestal_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="${ped_r}" length="${ped_h}"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="${ped_r}" length="${ped_h}"/></geometry>
+    </collision>
+    <xacro:cylinder_z_inertial m="${ped_m}" r="${ped_r}" h="${ped_h}"/>
+  </link>
+  <joint name="base_to_arm_pedestal_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_pedestal_link"/>
+    <origin xyz="${ped_x} 0 ${base_z/2 + ped_h/2}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="upper_arm_link">
+    <visual>
+      <origin xyz="0 0 ${ua_l/2}" rpy="0 0 0"/>
+      <geometry><box size="${ua_x} ${ua_y} ${ua_l}"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${ua_l/2}" rpy="0 0 0"/>
+      <geometry><box size="${ua_x} ${ua_y} ${ua_l}"/></geometry>
+    </collision>
+    <xacro:box_inertial m="${ua_m}" x="${ua_x}" y="${ua_y}" z="${ua_l}">
+      <origin xyz="0 0 ${ua_l/2}" rpy="0 0 0"/>
+    </xacro:box_inertial>
+  </link>
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="arm_pedestal_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0 0 ${ped_h/2}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="20.0" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <link name="forearm_link">
+    <visual>
+      <origin xyz="0 0 ${fa_l/2}" rpy="0 0 0"/>
+      <geometry><box size="${fa_x} ${fa_y} ${fa_l}"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${fa_l/2}" rpy="0 0 0"/>
+      <geometry><box size="${fa_x} ${fa_y} ${fa_l}"/></geometry>
+    </collision>
+    <xacro:box_inertial m="${fa_m}" x="${fa_x}" y="${fa_y}" z="${fa_l}">
+      <origin xyz="0 0 ${fa_l/2}" rpy="0 0 0"/>
+    </xacro:box_inertial>
+  </link>
+  <joint name="elbow_joint" type="revolute">
+    <parent link="upper_arm_link"/>
+    <child link="forearm_link"/>
+    <origin xyz="0 0 ${ua_l}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.5" upper="2.5" effort="10.0" velocity="2.0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <link name="tool_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><sphere radius="${tip_r}"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><sphere radius="${tip_r}"/></geometry>
+    </collision>
+    <xacro:sphere_inertial m="${tip_m}" r="${tip_r}"/>
+  </link>
+  <joint name="forearm_to_tool_joint" type="fixed">
+    <parent link="forearm_link"/>
+    <child link="tool_link"/>
+    <origin xyz="0 0 ${fa_l}" rpy="0 0 0"/>
+  </joint>
+
+</robot>

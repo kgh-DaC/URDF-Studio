@@ -1,0 +1,28 @@
+{
+  "robot_name": "diff_drive_robot",
+  "links": [
+    {"name": "base_link", "geometry": {"type": "box", "size": [0.4, 0.3, 0.1]},
+     "visual_origin": {"xyz": [0, 0, 0.08], "rpy": [0, 0, 0]}, "mass": 5.0, "color": [0.2, 0.45, 0.8, 1]},
+    {"name": "left_wheel_link", "geometry": {"type": "cylinder", "radius": 0.06, "length": 0.03},
+     "visual_origin": {"xyz": [0, 0, 0], "rpy": [1.5707963, 0, 0]}, "mass": 0.4, "color": [0.1, 0.1, 0.1, 1]},
+    {"name": "right_wheel_link", "geometry": {"type": "cylinder", "radius": 0.06, "length": 0.03},
+     "visual_origin": {"xyz": [0, 0, 0], "rpy": [1.5707963, 0, 0]}, "mass": 0.4, "color": [0.1, 0.1, 0.1, 1]},
+    {"name": "caster_link", "geometry": {"type": "sphere", "radius": 0.03},
+     "visual_origin": {"xyz": [0, 0, 0], "rpy": [0, 0, 0]}, "mass": 0.1},
+    {"name": "lidar_link", "geometry": {"type": "cylinder", "radius": 0.04, "length": 0.05},
+     "visual_origin": {"xyz": [0, 0, 0], "rpy": [0, 0, 0]}, "mass": 0.2, "color": [0.9, 0.55, 0.15, 1]}
+  ],
+  "joints": [
+    {"name": "left_wheel_joint", "type": "continuous", "parent": "base_link", "child": "left_wheel_link",
+     "origin": {"xyz": [0, 0.17, 0.06], "rpy": [0, 0, 0]}, "axis": [0, 1, 0],
+     "limit": {"effort": 5, "velocity": 15}},
+    {"name": "right_wheel_joint", "type": "continuous", "parent": "base_link", "child": "right_wheel_link",
+     "origin": {"xyz": [0, -0.17, 0.06], "rpy": [0, 0, 0]}, "axis": [0, 1, 0],
+     "limit": {"effort": 5, "velocity": 15}},
+    {"name": "caster_joint", "type": "fixed", "parent": "base_link", "child": "caster_link",
+     "origin": {"xyz": [-0.15, 0, 0.03], "rpy": [0, 0, 0]}},
+    {"name": "lidar_joint", "type": "fixed", "parent": "base_link", "child": "lidar_link",
+     "origin": {"xyz": [0.1, 0, 0.155], "rpy": [0, 0, 0]}}
+  ],
+  "assumptions": ["Sample: differential-drive base, wheel axis +Y, wheel cylinders rotated about X."]
+}

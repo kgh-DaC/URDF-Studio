@@ -1,0 +1,11 @@
+fastapi==0.153.0
+uvicorn[standard]==0.54.0
+python-multipart==0.0.32
+pydantic==2.14.1
+anthropic==1.15.0
+trimesh==5.1.1
+numpy==2.5.4
+pycollada  # trimesh DAE loading
+# tests
+pytest==9.1.1
+httpx==0.28.1

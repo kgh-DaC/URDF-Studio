@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>URDF Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- CDN versions pinned exactly: three@0.186.1, urdf-loader@0.13.1.
+       integrity = SRI (sha384) for every module actually loaded (QA W7). Browsers that do not support
+       import map integrity (e.g. older Firefox/Safari) ignore the field and load the module unverified.
+       After changing a version, recompute: openssl dgst -sha384 -binary f.js | openssl base64 -A -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+      "urdf-loader": "https://cdn.jsdelivr.net/npm/urdf-loader@0.13.1/src/URDFLoader.js"
+    },
+    "integrity": {
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js": "sha384-m8JoFX52V6NGv2usipnlLJKnJfL7IE8dbniPDDCSGSQv3Hm4n6PjfV6syVwfuoRc",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js": "sha384-mdKeCwPEcbDvzaxwhm+MVuLoMou+E7jQqrs4tmu/n8HBYPGI1kZt0MkJxlMR4zFM",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/controls/OrbitControls.js": "sha384-LSqANrugPGTgf0eYsQTloqKWy926dOOXo2iZ9y6wLMIDEQoU9AaCLJF1Vcc7oJXr",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/OBJLoader.js": "sha384-E5a7P9aVdjzSnxm1j9odsmLWFLT76dcMJLu3rU0u9U5B7l9KCchKCjHjK/zACKn5",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/STLLoader.js": "sha384-HixkrAx46sEng+8NQmAw+kPvxaEsgZWC9vrtCGmnp3FL1PejxOV5LSByI/8n1WRz",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/ColladaLoader.js": "sha384-qcJUo2Uqukd3cPWLM8j+apDf60yoHIT0mbqthKaEL86Jay9V5zz22voY+KmxLQeV",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/TGALoader.js": "sha384-htI57ivSZMKJ1AHyLxboCme7cGiWMge6he0cuVPb/YOi9YmtbeKjoww+N52mrlKF",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/collada/ColladaComposer.js": "sha384-7f5PwqHZXHSp5jVV7bg3wsphM7OkWO8ivbrdEZ3uIn3ezHCCFCbLlcRUh67vq7LA",
+      "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/collada/ColladaParser.js": "sha384-A4s9cNGNoGwErvJIWZxmX65TMqZaCT9Uhyuf83iEAJmZVlMjvwijJEQnT6GVWPjv",
+      "https://cdn.jsdelivr.net/npm/urdf-loader@0.13.1/src/URDFLoader.js": "sha384-xwp/4YP/3g5GHqXZopI9Pa7liKU3xWpCRvMbey9dHeYyiU2rnf4cXpIVXKw74OTI",
+      "https://cdn.jsdelivr.net/npm/urdf-loader@0.13.1/src/URDFClasses.js": "sha384-pp/5uNsdl4q3C6LUBfL22i0G9MOMw0+LnXhwfWkBb+92uUZ30xOAYV+w5TQDOPPo"
+    }
+  }
+  </script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">URDF Studio</div>
+  <div id="apiStatus" class="badge">API 상태 확인 중…</div>
+  <div class="spacer"></div>
+  <button id="btnDownloadUrdf" class="btn" title="편집기의 URDF를 다운로드">URDF 다운로드</button>
+  <button id="btnDownloadZip" class="btn primary" title="ROS 2 description 패키지 zip">ROS 2 패키지 (zip)</button>
+</header>
+
+<main class="layout">
+  <!-- Left: inputs -->
+  <aside class="panel left">
+    <section>
+      <h2>자연어로 생성</h2>
+      <textarea id="prompt" rows="6" maxlength="8000"
+        placeholder="예) 바퀴 2개와 캐스터 1개, 상단에 라이다가 있는 차동구동 로봇. 몸체 40x30x10 cm"></textarea>
+      <label class="check"><input type="checkbox" id="useBase"> 편집기의 URDF를 기반으로 수정</label>
+      <button id="btnGenerate" class="btn primary block">생성</button>
+      <div id="genStatus" class="muted small"></div>
+      <ol id="attempts" class="attempts small"></ol>
+    </section>
+
+    <section>
+      <h2>메시 업로드 <span class="muted small">stl · dae · obj, 최대 20 MB</span></h2>
+      <input type="file" id="meshFiles" accept=".stl,.dae,.obj" multiple>
+      <div class="row">
+        <label>단위 <select id="meshUnit"><option value="">자동</option><option value="mm">mm</option><option value="m">m</option></select></label>
+        <label>질량(kg) <input type="number" id="meshMass" min="0" step="0.01" placeholder="자동"></label>
+      </div>
+      <button id="btnUpload" class="btn block">업로드 및 분석</button>
+      <div class="muted small">체크한 메시는 생성 요청에 포함됩니다.</div>
+      <ul id="meshList" class="meshlist small"></ul>
+    </section>
+
+    <section>
+      <h2>샘플 / 파일</h2>
+      <div class="row">
+        <select id="sampleSelect"></select>
+        <button id="btnLoadSample" class="btn">불러오기</button>
+      </div>
+      <label class="btn block filebtn">URDF 파일 열기<input type="file" id="urdfFile" accept=".urdf,.xml" hidden></label>
+      <div class="muted small">기존 URDF는 아래 편집기에 붙여넣으면 자동 검증·렌더링됩니다.</div>
+    </section>
+  </aside>
+
+  <!-- Center: viewer -->
+  <section class="viewer-wrap">
+    <div id="viewer"></div>
+    <div id="viewerMsg" class="viewer-msg"></div>
+    <div class="joints" id="jointsPanel">
+      <div class="joints-head">
+        <strong>조인트</strong>
+        <button id="btnResetJoints" class="btn tiny">0으로</button>
+      </div>
+      <div id="jointSliders"></div>
+    </div>
+  </section>
+
+  <!-- Right: validation -->
+  <aside class="panel right">
+    <section>
+      <h2>검증 결과</h2>
+      <div id="valSummary" class="summary">-</div>
+      <ul id="issues" class="issues"></ul>
+    </section>
+    <section>
+      <h2>가정 (assumptions)</h2>
+      <ul id="assumptions" class="assumptions small"></ul>
+    </section>
+  </aside>
+
+  <!-- Bottom: editor -->
+  <section class="editor-wrap">
+    <div class="editor-head">
+      <strong>URDF 편집기</strong>
+      <span id="editorState" class="muted small"></span>
+      <div class="spacer"></div>
+      <label class="check small"><input type="checkbox" id="autoApply" checked> 입력 시 자동 검증·렌더</label>
+      <button id="btnApply" class="btn">검증 + 렌더</button>
+    </div>
+    <div class="editor">
+      <pre id="gutter" class="gutter" aria-hidden="true">1</pre>
+      <textarea id="editor" spellcheck="false" wrap="off" placeholder="여기에 URDF XML을 붙여넣으세요"></textarea>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

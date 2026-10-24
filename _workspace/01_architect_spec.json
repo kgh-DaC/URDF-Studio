@@ -1,0 +1,153 @@
+{
+  "robot_name": "sample_robot",
+  "links": [
+    {
+      "name": "base_link",
+      "geometry": {"type": "box", "size": [0.6, 0.4, 0.15]},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [0.0, 0.0, 0.0]},
+      "mass": 10.0,
+      "color": [0.2, 0.4, 0.8, 1.0]
+    },
+    {
+      "name": "front_left_wheel_link",
+      "geometry": {"type": "cylinder", "radius": 0.1, "length": 0.05},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [1.5708, 0.0, 0.0]},
+      "mass": 1.0,
+      "color": [0.1, 0.1, 0.1, 1.0]
+    },
+    {
+      "name": "front_right_wheel_link",
+      "geometry": {"type": "cylinder", "radius": 0.1, "length": 0.05},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [1.5708, 0.0, 0.0]},
+      "mass": 1.0,
+      "color": [0.1, 0.1, 0.1, 1.0]
+    },
+    {
+      "name": "rear_left_wheel_link",
+      "geometry": {"type": "cylinder", "radius": 0.1, "length": 0.05},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [1.5708, 0.0, 0.0]},
+      "mass": 1.0,
+      "color": [0.1, 0.1, 0.1, 1.0]
+    },
+    {
+      "name": "rear_right_wheel_link",
+      "geometry": {"type": "cylinder", "radius": 0.1, "length": 0.05},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [1.5708, 0.0, 0.0]},
+      "mass": 1.0,
+      "color": [0.1, 0.1, 0.1, 1.0]
+    },
+    {
+      "name": "arm_pedestal_link",
+      "geometry": {"type": "cylinder", "radius": 0.06, "length": 0.05},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [0.0, 0.0, 0.0]},
+      "mass": 0.5,
+      "color": [0.6, 0.6, 0.6, 1.0]
+    },
+    {
+      "name": "upper_arm_link",
+      "geometry": {"type": "box", "size": [0.05, 0.05, 0.3]},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.15], "rpy": [0.0, 0.0, 0.0]},
+      "mass": 1.0,
+      "color": [1.0, 0.5, 0.1, 1.0]
+    },
+    {
+      "name": "forearm_link",
+      "geometry": {"type": "box", "size": [0.04, 0.04, 0.25]},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.125], "rpy": [0.0, 0.0, 0.0]},
+      "mass": 0.6,
+      "color": [1.0, 0.5, 0.1, 1.0]
+    },
+    {
+      "name": "tool_link",
+      "geometry": {"type": "sphere", "radius": 0.02},
+      "visual_origin": {"xyz": [0.0, 0.0, 0.0], "rpy": [0.0, 0.0, 0.0]},
+      "mass": 0.05,
+      "color": [0.6, 0.6, 0.6, 1.0]
+    }
+  ],
+  "joints": [
+    {
+      "name": "front_left_wheel_joint",
+      "type": "continuous",
+      "parent": "base_link",
+      "child": "front_left_wheel_link",
+      "origin": {"xyz": [0.2, 0.23, -0.05], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"effort": 5.0, "velocity": 10.0}
+    },
+    {
+      "name": "front_right_wheel_joint",
+      "type": "continuous",
+      "parent": "base_link",
+      "child": "front_right_wheel_link",
+      "origin": {"xyz": [0.2, -0.23, -0.05], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"effort": 5.0, "velocity": 10.0}
+    },
+    {
+      "name": "rear_left_wheel_joint",
+      "type": "continuous",
+      "parent": "base_link",
+      "child": "rear_left_wheel_link",
+      "origin": {"xyz": [-0.2, 0.23, -0.05], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"effort": 5.0, "velocity": 10.0}
+    },
+    {
+      "name": "rear_right_wheel_joint",
+      "type": "continuous",
+      "parent": "base_link",
+      "child": "rear_right_wheel_link",
+      "origin": {"xyz": [-0.2, -0.23, -0.05], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"effort": 5.0, "velocity": 10.0}
+    },
+    {
+      "name": "base_to_arm_pedestal_joint",
+      "type": "fixed",
+      "parent": "base_link",
+      "child": "arm_pedestal_link",
+      "origin": {"xyz": [0.1, 0.0, 0.1], "rpy": [0.0, 0.0, 0.0]}
+    },
+    {
+      "name": "shoulder_joint",
+      "type": "revolute",
+      "parent": "arm_pedestal_link",
+      "child": "upper_arm_link",
+      "origin": {"xyz": [0.0, 0.0, 0.025], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"lower": -1.5708, "upper": 1.5708, "effort": 20.0, "velocity": 1.5}
+    },
+    {
+      "name": "elbow_joint",
+      "type": "revolute",
+      "parent": "upper_arm_link",
+      "child": "forearm_link",
+      "origin": {"xyz": [0.0, 0.0, 0.3], "rpy": [0.0, 0.0, 0.0]},
+      "axis": [0.0, 1.0, 0.0],
+      "limit": {"lower": -2.5, "upper": 2.5, "effort": 10.0, "velocity": 2.0}
+    },
+    {
+      "name": "forearm_to_tool_joint",
+      "type": "fixed",
+      "parent": "forearm_link",
+      "child": "tool_link",
+      "origin": {"xyz": [0.0, 0.0, 0.25], "rpy": [0.0, 0.0, 0.0]}
+    }
+  ],
+  "assumptions": [
+    "4륜 박스 베이스 + 2자유도 평면 팔(shoulder/elbow 피치) 샘플 모델. 치수/질량은 사용자가 지정하지 않아 소형 교육용 모바일 매니퓰레이터 수준으로 가정함.",
+    "베이스: 0.6 x 0.4 x 0.15 m 박스, 10 kg, 균일 밀도. base_link 원점은 박스 중심.",
+    "바퀴: 반지름 0.10 m, 폭 0.05 m, 1 kg 균일 원기둥. 차체 측면과 5 mm 간격(y=±0.23 m), 바퀴 중심은 base_link 기준 x=±0.20 m, z=-0.05 m (지면은 base_link 기준 z=-0.15 m, 차체 하부 지상고 0.075 m).",
+    "바퀴 링크 좌표계는 base_link와 같은 방향이며 원기둥 축은 링크 y축(visual_origin rpy=1.5708 0 0). 관성은 명세에 넣지 않고 builder가 원기둥 공식으로 계산한다(inertial origin=visual_origin, 원기둥 자체 축 기준).",
+    "바퀴는 continuous 조인트(axis 0 1 0), effort 5 N·m, velocity 10 rad/s 가정. 4륜 독립 구동(스키드 스티어) 가정, 조향 없음.",
+    "'2자유도 팔'은 피치축 2개(shoulder_joint, elbow_joint, 모두 axis 0 1 0)의 평면 2링크 팔로 해석함. pan(yaw)+pitch 구성이 필요하면 shoulder_joint 축을 z로 바꾸면 됨.",
+    "팔은 베이스 상면 중심에서 x=+0.10 m 앞쪽에 고정된 받침대(반지름 0.06 m, 높이 0.05 m, 0.5 kg 원기둥) 위에 장착(받침대 원점 z=+0.10 m, 상면 z=+0.125 m).",
+    "상완: 0.05 x 0.05 x 0.30 m 박스 1.0 kg, 전완: 0.04 x 0.04 x 0.25 m 박스 0.6 kg. 조인트 원점은 링크 하단, 형상 중심(=COM)은 visual_origin z=길이/2.",
+    "관절 한계: shoulder ±1.5708 rad (20 N·m, 1.5 rad/s), elbow ±2.5 rad (10 N·m, 2.0 rad/s) 가정.",
+    "tool_link: 전완 끝의 반지름 0.02 m, 0.05 kg 구(엔드이펙터 기준 프레임 겸 시각 표시).",
+    "메시 미사용: visual/collision 모두 기본 형상(box/cylinder/sphere)이라 외부 파일 의존 없음. collision은 visual과 같은 원시형상(기본값).",
+    "색상: base 파랑(0.2 0.4 0.8), 바퀴 검정(0.1 0.1 0.1), 팔 주황(1.0 0.5 0.1), 받침대/tool 회색(0.6 0.6 0.6).",
+    "output/sample_robot.urdf의 조인트 <dynamics damping=0.1 friction=0.0>는 RobotSpec에 표현 필드가 없어 명세에서 제외됨(builder로 재생성하면 빠짐)."
+  ]
+}
